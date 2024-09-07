@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./my-next-app # Ensure Dockerfile is located in this directory
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      API_URL: "http://backend:8000/api"
+    # volumes:
+    #   - ./my-next-app:/app # Use relative paths or Unix-style paths
+  backend:
+    build:
+      context: ./back-end/dashboard
+    command:
+      ["gunicorn", "dashboard.wsgi:application", "--bind", "0.0.0.0:8000"]
+    ports:
+      - "8000:8000"
+    # volumes:
+    #   - ./back-end/dashboard:/app # Adjust volume path as needed
+    depends_on:
+      - db
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+
+volumes:
+  postgres_data:
